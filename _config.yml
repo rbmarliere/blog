@@ -21,15 +21,12 @@
 title: Ricardo B. Marliere
 email: ricardo@marliere.net
 description: >- # this means to ignore newlines until "baseurl:"
+  Yet another blog
 baseurl: "/~ricardo" # the subpath of your site, e.g. /blog
 url: "https://marliere.net" # the base hostname & protocol for your site, e.g. http://example.com
 
 # Build settings
 theme: minima
-plugins:
-  - jekyll-feed
-
-show_excerpts: true
 
 # Exclude from processing.
 # The following items will not be processed, by default.
@@ -39,7 +36,8 @@ show_excerpts: true
 # Excluded items can be processed by explicitly listing the directories or
 # their entries' file path in the `include:` list.
 #
-# exclude:
+exclude:
+  - LICENSE
 #   - .sass-cache/
 #   - .jekyll-cache/
 #   - gemfiles/
