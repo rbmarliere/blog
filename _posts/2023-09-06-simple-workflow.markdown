@@ -100,7 +100,7 @@ Create a trixie (current Debian's [*testing* distribution][deb-releases]) image 
 #!/bin/bash
 wget "https://raw.githubusercontent.com/google/syzkaller/master/tools/create-image.sh"
 chmod +x create-image.sh
-./create-image.sh --distribuition trixie
+./create-image.sh --distribution trixie
 {% endhighlight %}
 
 This yields three files: *trixie.img*, *trixie.id_rsa* and *trixie.id_rsa.pub*, which
