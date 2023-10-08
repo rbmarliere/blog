@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://marliere.net/~ricardo/feed.xml" rel="self" type="application/atom+xml" /><link href="https://marliere.net/~ricardo/" rel="alternate" type="text/html" /><updated>2023-10-08T15:58:13-03:00</updated><id>https://marliere.net/~ricardo/feed.xml</id><title type="html">Ricardo B. Marliere</title><subtitle>Yet another blog</subtitle><entry><title type="html">A better workflow for kernel debugging</title><link href="https://marliere.net/~ricardo/2023/10/08/better-workflow.html" rel="alternate" type="text/html" title="A better workflow for kernel debugging" /><published>2023-10-08T15:15:00-03:00</published><updated>2023-10-08T15:15:00-03:00</updated><id>https://marliere.net/~ricardo/2023/10/08/better-workflow</id><content type="html" xml:base="https://marliere.net/~ricardo/2023/10/08/better-workflow.html"><![CDATA[<p>If you followed along my last <a href="/~ricardo/2023/09/06/simple-workflow.html">post</a>, you may have have found some
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://marliere.net/~ricardo/feed.xml" rel="self" type="application/atom+xml" /><link href="https://marliere.net/~ricardo/" rel="alternate" type="text/html" /><updated>2023-10-08T19:41:37-03:00</updated><id>https://marliere.net/~ricardo/feed.xml</id><title type="html">Ricardo B. Marliere</title><subtitle>Yet another blog</subtitle><entry><title type="html">A better workflow for kernel debugging</title><link href="https://marliere.net/~ricardo/2023/10/08/better-workflow.html" rel="alternate" type="text/html" title="A better workflow for kernel debugging" /><published>2023-10-08T15:15:00-03:00</published><updated>2023-10-08T15:15:00-03:00</updated><id>https://marliere.net/~ricardo/2023/10/08/better-workflow</id><content type="html" xml:base="https://marliere.net/~ricardo/2023/10/08/better-workflow.html"><![CDATA[<p>If you followed along my last <a href="/~ricardo/2023/09/06/simple-workflow.html">post</a>, you may have have found some
 difficulties like I did. Namely, making sure the work is done without confusion. In this
 post I want to share a few tips that helped me stay organized and effective, I hope its
 helpful to some of you as well.</p>
@@ -172,17 +172,17 @@ rq <span class="nt">-g</span> <span class="nt">--wait-gdb</span></code></pre></f
 
 <h2 id="kdump">Kdump</h2>
 
-<p>Recently I was looking into a <a href="https://syzkaller.appspot.com/bug?extid=621409285c4156a009b3">bug</a> that is a racing problem. That means that,
+<p>Recently I was looking into a bug that is a concurrency problem. That means that,
 although the reproducer provided can in fact reproduce the problem, it happens at random
 times. That means you are probably gonna have to wait for a long time. So as much as the
-<em>gdb</em> workflow presented on the <a href="/~ricardo/2023/09/06/simple-workflow.html">last post</a> is very useful, for bugs
+<em>gdb</em> workflow presented in the <a href="/~ricardo/2023/09/06/simple-workflow.html">last post</a> is very useful, for bugs
 like this it can be quite painful. Using <a href="https://www.kernel.org/doc/html/latest/admin-guide/kdump/kdump.html">Kdump</a> and the <a href="https://github.com/crash-utility/crash">crash utility</a> enabled me to inspect the system state at any time without having to depend on a running virtual machine.</p>
 
 <p>I went through this <a href="https://www.youtube.com/watch?v=aUGNDJPpUUg">excellent presentation</a> by Steve Rostedt and I must
 say, it took me a while to grasp the process and setup everything. But its a very good
 tool to have, sometimes. Hopefully I can help you save some time. The first thing you
 need is to build a “crash” kernel. This is the kernel that it’s going to replace the
-running kernel after a panic. Here is what I did:</p>
+system kernel after a panic. Here is what I did:</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
 
@@ -244,7 +244,7 @@ it. These are the symbols that need to be enabled to successfully boot the kerne
 a crash. Note that the ones marked with <strong>*</strong> are dependencies for the root filesystem.
 Systemd needs CGROUPS and INOTIFY_USER and the others come from the <em>/etc/fstab</em> written
 by the syzkaller’s <a href="https://github.com/google/syzkaller/blob/master/tools/create-image.sh#L161">create-image.sh</a> script that I used to create my
-root filesystem.</p>
+root filesystem (therefore, optional).</p>
 
 <p>After this, you should install <em>kdump-tools</em> inside your VM:</p>
 
@@ -307,7 +307,7 @@ gcc rep.c <span class="o">&amp;&amp;</span> ./a.out</code></pre></figure>
 <p>Note the need for <em>root=/dev/sda</em> for the automatic handling of the crash dump taking
 place. If all went well, you’re gonna see the dump and the dmesg files under your host
 <em>/var/crash</em> directory. But how to use it? Here enters the <a href="https://github.com/crash-utility/crash">crash utility</a>. For
-some reason that I didn’t fully understand, probably Debian related<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>, I was only able
+some reason that I didn’t fully understand – probably Debian related<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup> – I was only able
 to inspect the dump file using a locally built binary. Therefore, don’t install the
 <a href="https://tracker.debian.org/pkg/crash">crash</a> package in your host.</p>
 
@@ -462,7 +462,7 @@ spotted an error in here, please don’t hesitate in reaching out to me at
 <div class="footnotes" role="doc-endnotes">
   <ol>
     <li id="fn:1" role="doc-endnote">
-      <p>AFAIK, kdump-tools is packaged with the clear use case of dumping a running Debian kernel and depends on the distro <em>/boot/*</em> files <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+      <p>As far as I can tell, <em>kdump-tools</em> is packaged with the clear use case of dumping a running Debian kernel and depends on the distro <em>/boot/*</em> files <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
   </ol>
 </div>]]></content><author><name></name></author><category term="linux" /><category term="kernel" /><category term="mentorship" /><summary type="html"><![CDATA[If you followed along my last post, you may have have found some difficulties like I did. Namely, making sure the work is done without confusion. In this post I want to share a few tips that helped me stay organized and effective, I hope its helpful to some of you as well.]]></summary></entry><entry><title type="html">A simple workflow to debug the Linux Kernel</title><link href="https://marliere.net/~ricardo/2023/09/06/simple-workflow.html" rel="alternate" type="text/html" title="A simple workflow to debug the Linux Kernel" /><published>2023-09-06T15:45:00-03:00</published><updated>2023-09-06T15:45:00-03:00</updated><id>https://marliere.net/~ricardo/2023/09/06/simple-workflow</id><content type="html" xml:base="https://marliere.net/~ricardo/2023/09/06/simple-workflow.html"><![CDATA[<p>Hello again!</p>
