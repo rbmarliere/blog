@@ -1,4 +1,56 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://marliere.net/~ricardo/feed.xml" rel="self" type="application/atom+xml" /><link href="https://marliere.net/~ricardo/" rel="alternate" type="text/html" /><updated>2023-10-08T15:58:13-03:00</updated><id>https://marliere.net/~ricardo/feed.xml</id><title type="html">Ricardo B. Marliere</title><subtitle>Yet another blog</subtitle><entry><title type="html">A better workflow for kernel debugging</title><link href="https://marliere.net/~ricardo/2023/10/08/better-workflow.html" rel="alternate" type="text/html" title="A better workflow for kernel debugging" /><published>2023-10-08T15:15:00-03:00</published><updated>2023-10-08T15:15:00-03:00</updated><id>https://marliere.net/~ricardo/2023/10/08/better-workflow</id><content type="html" xml:base="https://marliere.net/~ricardo/2023/10/08/better-workflow.html"><![CDATA[<p>If you followed along my last <a href="/~ricardo/2023/09/06/simple-workflow.html">post</a>, you may have have found some
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>A better workflow for kernel debugging | Ricardo B. Marliere</title>
+<meta name="generator" content="Jekyll v4.3.2" />
+<meta property="og:title" content="A better workflow for kernel debugging" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="If you followed along my last post, you may have have found some difficulties like I did. Namely, making sure the work is done without confusion. In this post I want to share a few tips that helped me stay organized and effective, I hope its helpful to some of you as well." />
+<meta property="og:description" content="If you followed along my last post, you may have have found some difficulties like I did. Namely, making sure the work is done without confusion. In this post I want to share a few tips that helped me stay organized and effective, I hope its helpful to some of you as well." />
+<link rel="canonical" href="https://marliere.net/~ricardo/2023/10/08/better-workflow.html" />
+<meta property="og:url" content="https://marliere.net/~ricardo/2023/10/08/better-workflow.html" />
+<meta property="og:site_name" content="Ricardo B. Marliere" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-10-08T15:15:00-03:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="A better workflow for kernel debugging" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2023-10-08T15:15:00-03:00","datePublished":"2023-10-08T15:15:00-03:00","description":"If you followed along my last post, you may have have found some difficulties like I did. Namely, making sure the work is done without confusion. In this post I want to share a few tips that helped me stay organized and effective, I hope its helpful to some of you as well.","headline":"A better workflow for kernel debugging","mainEntityOfPage":{"@type":"WebPage","@id":"https://marliere.net/~ricardo/2023/10/08/better-workflow.html"},"url":"https://marliere.net/~ricardo/2023/10/08/better-workflow.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/~ricardo/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://marliere.net/~ricardo/feed.xml" title="Ricardo B. Marliere" /></head>
+<body><header class="site-header">
+  <div class="wrapper"><a class="site-title" rel="author" href="/~ricardo/">Ricardo B. Marliere</a>
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+        <div class="trigger">
+          <a class="page-link" href="/~ricardo/about">About</a>
+          <a class="page-link" href="/">Contact</a>
+        </div>
+      </nav>
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">A better workflow for kernel debugging</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2023-10-08T15:15:00-03:00" itemprop="datePublished">Oct 8, 2023
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>If you followed along my last <a href="/~ricardo/2023/09/06/simple-workflow.html">post</a>, you may have have found some
 difficulties like I did. Namely, making sure the work is done without confusion. In this
 post I want to share a few tips that helped me stay organized and effective, I hope its
 helpful to some of you as well.</p>
@@ -465,315 +517,30 @@ spotted an error in here, please don’t hesitate in reaching out to me at
       <p>AFAIK, kdump-tools is packaged with the clear use case of dumping a running Debian kernel and depends on the distro <em>/boot/*</em> files <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
   </ol>
-</div>]]></content><author><name></name></author><category term="linux" /><category term="kernel" /><category term="mentorship" /><summary type="html"><![CDATA[If you followed along my last post, you may have have found some difficulties like I did. Namely, making sure the work is done without confusion. In this post I want to share a few tips that helped me stay organized and effective, I hope its helpful to some of you as well.]]></summary></entry><entry><title type="html">A simple workflow to debug the Linux Kernel</title><link href="https://marliere.net/~ricardo/2023/09/06/simple-workflow.html" rel="alternate" type="text/html" title="A simple workflow to debug the Linux Kernel" /><published>2023-09-06T15:45:00-03:00</published><updated>2023-09-06T15:45:00-03:00</updated><id>https://marliere.net/~ricardo/2023/09/06/simple-workflow</id><content type="html" xml:base="https://marliere.net/~ricardo/2023/09/06/simple-workflow.html"><![CDATA[<p>Hello again!</p>
+</div>
 
-<p>I’m happy to announce that I have been accepted as a mentee for the 2023 Fall edition of
-the <a href="https://mentorship.lfx.linuxfoundation.org/project/65d4c337-66fd-4d22-8a21-e836fafbebc4">“Linux Kernel Bug Fixing”</a> mentorship from the Linux Foundation.
-Writing about the experience is one of the required tasks and that is indeed the
-motivation behind the creation of this blog, although I flirted with the idea before but
-never got to actually publish anything. Since the main task of the mentorship is to fix
-bugs, I’m gonna try to organize my thoughts about the workflow for accomplishing that in
-this post. The basic assumption is of course x86_64, for the sake of simplicity.</p>
+  </div><a class="u-url" href="/~ricardo/2023/10/08/better-workflow.html" hidden></a>
+</article>
 
-<p>The Linux Kernel is a vast project that spans many areas of computing and long are the
-days where a single mind could understand it all as a whole. The majority of the work in
-it is done by big companies that need to support it for their operation. It can be
-overwhelming to even try finding a <a href="https://www.kernel.org/doc/html/latest/process/development-process.html">place where to start</a> and this is why intern and
-mentorship programs are so important! It is typical for first time contributors to any FOSS
-project to focus on QA - Quality Assurance. That could mean many things but in the
-context of the Linux Kernel, fixing bugs is the best example. In other projects, simply
-using it extensively and reporting a bug found is already a great contribution, but for
-simple desktop users such as myself it is rather difficult to come across a bug in the
-kernel, these days.</p>
+      </div>
+    </main><footer class="site-footer h-card">
+    <div style="text-align: center; font-size: 12px;">
+      <p>
+        This blog is powered by <a href="https://jekyllrb.com">Jekyll</a>.
+        <br/>
+        Source code is <a href="https://github.com/rbmarliere/blog">available</a> under MIT License.
+        <br/>
+        All original writing licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+      </p>
+      <p class="feed-subscribe">
+        <a href="https://marliere.net/~ricardo/feed.xml">
+          <svg class="svg-icon orange">
+            <use xlink:href="/~ricardo/assets/minima-social-icons.svg#rss"></use>
+          </svg>
+        </a>
+      </p>
+    </div>
+</footer>
+</body>
 
-<p>This is where automated tools such as <a href="https://github.com/google/syzkaller/">Syzkaller</a> can come in handy. It is a
-fuzzer and nowadays it supports all other major kernels. Software fuzzing is a technique
-that feeds random inputs into a program until it crashes and it can be done with pretty
-much any program that takes input somehow. In the context of the Linux Kernel, that can
-get quite complicated, but it is not the scope of this text to go much into these
-details. Please refer to <a href="https://www.linuxfoundation.org/webinars/dynamic-program-analysis-for-fun-and-profit">this excellent presentation</a> by one of the original
-developer of the tool, Dmitry Vyukov. For the purpose of this text it is sufficient to
-say that there is <a href="https://syzkaller.appspot.com/">infrastructure</a> setup that extensively test the kernel in
-many <a href="https://syzkaller.appspot.com/upstream/repos">trees</a> and architectures, so that bugs get reported to the mailing
-lists as they’re found.</p>
-
-<p>There are many other tools available for testing and finding bugs in the kernel, of
-which Sergio Prado wrote a <a href="https://sergioprado.blog/how-is-the-linux-kernel-tested/">nice summary</a> about. But the goal here is to focus
-on the <em>fixing</em> part of the process. For that I must refer the reader to <a href="https://lwn.net/images/pdf/LDD3/ch04.pdf">Chapter
-4</a> of the classic book “Linux Device Drivers”. It is also a good idea to read the
-available documentation of the kernel on the subject, such as <a href="https://www.kernel.org/doc/html/latest/dev-tools/kgdb.html">this</a>.
-Another technique which is essential to the task is tracing, which was masterfully
-introduced in <a href="https://www.youtube.com/watch?v=JRyrhsx-L5Y">this talk</a> by Steven Rostedt.</p>
-
-<p>Another <a href="https://www.linuxfoundation.org/webinars/tools-and-techniques-to-debug-an-embedded-linux-system">great introduction</a> on debugging tools and techniques was made by
-Sergio Prado. In it, he starts by splitting the most common problems in 5 categories,
-namely:</p>
-<ul>
-  <li>Crash</li>
-  <li>Lockup / Hang</li>
-  <li>Logic / Implementation</li>
-  <li>Resource Leakage</li>
-  <li>Performance</li>
-</ul>
-
-<p>Each one of these require a different set of skills and strategies, which include log
-and dump analysis, tracing and profiling, interactive debugging, etc. The basic workflow
-to fix a bug is comprised of a few high level steps:</p>
-<ul>
-  <li>Find the bug</li>
-  <li>Reproduce it</li>
-  <li>Identify the cause</li>
-  <li>Develop the fix</li>
-  <li>Test that it worked</li>
-</ul>
-
-<p>For each of these steps there are several sub-steps, depending on the degree of
-complexity of the problem. For simplicity, let’s illustrate what a common crash analysis
-reported by Syzkaller would look like. First, go to its dashboard and find a bug you
-might be interested on. Make sure to read <a href="https://github.com/google/syzkaller/blob/master/docs/linux/">their documentation</a> before
-that. You gonna need to know the basics of a kernel <em>oops</em>, too. Refer to <a href="https://www.opensourceforu.com/2011/01/understanding-a-kernel-oops/">here</a>
-as a good starting point.</p>
-
-<p>After finding the bug, you must be able to reproduce it. Many of the bugs reported have
-C programs carefully crafted by the tool that will trigger the issue. There are also a
-special <em>syz</em> program, but we’ll get into that later. For each bug, the syzbot also
-supply us with the kernel <em>.config</em> file and the specific commit which triggers the issue.
-That is, if you run the C reproducer on any other kernel version, or any other
-configuration, the problem may not arise. So, if you want to be able to successfully
-reproduce it, you must take that into account. The bot also provides a bootable
-QEMU-enabled disk image and the kernel <em>vmlinux</em> and <em>bzImage</em> for your convenience (more on
-that <a href="https://github.com/google/syzkaller/blob/master/docs/syzbot_assets.md">here</a>). That is excellent for rapid testing, however if you are to
-locally test a patch you’re developing, you gonna need to build it anyway.</p>
-
-<p>Alright, so the goal is to reproduce the error in a QEMU virtual machine with a locally
-built <em>bzImage</em>. But first things first. A kernel image by itself isn’t of much use
-without a root filesystem from where you can run a reproducer program. I recommend at
-least once going through the process of <a href="https://ibug.io/blog/2019/04/os-lab-1/">manually creating</a> an initramfs to boot
-into, after reading about it in the <a href="https://www.kernel.org/doc/html/latest/filesystems/ramfs-rootfs-initramfs.html">kernel documentation</a>. Luckily, there
-are many tools to accomplish that automatically, such as <a href="https://buildroot.org/">Buildroot</a> - which
-is extra useful if you’re hacking around with embedded devices and cross-compilation.
-But since the context here is Syzkaller, let’s use <a href="https://github.com/google/syzkaller/blob/master/tools/create-image.sh">their script</a>, so download
-it somewhere into your system. It is an automated tool to create a suitable image to use
-with QEMU. It leverages Debian’s <a href="https://wiki.debian.org/Debootstrap">Debootstrap</a> tool, so if you’re not
-running Debian this is another reason to :)</p>
-
-<p>Create a trixie (current Debian’s <a href="https://wiki.debian.org/DebianReleases"><em>testing</em> distribution</a>) image like so
-(make sure you have the required dependencies installed):</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
-wget <span class="s2">"https://raw.githubusercontent.com/google/syzkaller/master/tools/create-image.sh"</span>
-<span class="nb">chmod</span> +x create-image.sh
-./create-image.sh <span class="nt">--distribution</span> trixie</code></pre></figure>
-
-<p>This yields three files: <em>trixie.img</em>, <em>trixie.id_rsa</em> and <em>trixie.id_rsa.pub</em>, which
-we’ll use shortly. Now that we have the root filesystem, we need to build the kernel.
-Let’s take a look at <a href="https://groups.google.com/g/syzkaller-bugs/c/YIWmpQWCjT4/m/tw1tfm_xBAAJ">this bug</a>:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Hello,
-
-syzbot found the following issue on:
-
-HEAD commit: b84acc11b1c9 Merge tag 'fbdev-for-6.6-rc1' of git://git.ke..
-git tree: upstream
-console+strace: https://syzkaller.appspot.com/x/log.txt?x=10e9af87a80000
-kernel config: https://syzkaller.appspot.com/x/.config?x=3aba740d8a88ff1d
-dashboard link: https://syzkaller.appspot.com/bug?extid=c063a4e176681d2e0380
-compiler: gcc (Debian 12.2.0-14) 12.2.0, GNU ld (GNU Binutils for Debian) 2.40
-syz repro: https://syzkaller.appspot.com/x/repro.syz?x=16e4acdba80000
-C reproducer: https://syzkaller.appspot.com/x/repro.c?x=14eb56dba80000
-
-Downloadable assets:
-disk image: https://storage.googleapis.com/syzbot-assets/8b5634407855/disk-b84acc11.raw.xz
-vmlinux: https://storage.googleapis.com/syzbot-assets/31f561af0e06/vmlinux-b84acc11.xz
-kernel image: https://storage.googleapis.com/syzbot-assets/37275212826f/bzImage-b84acc11.xz
-
-IMPORTANT: if you fix the issue, please add the following tag to the commit:
-Reported-by: syzbot+c063a4...@syzkaller.appspotmail.com
-
-(...)
-</code></pre></div></div>
-
-<p>Note however that these resources are only available until the bugs are fixed, so if you
-can’t download these files at the time of reading just proceed to investigate a more
-recent bug.</p>
-
-<p>Let’s build the kernel, so if you haven’t already this is the time to clone Linus’ tree:</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
-git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-<span class="nb">cd </span>linux
-git checkout b84acc11b1c9
-wget <span class="s2">"https://syzkaller.appspot.com/x/.config?x=3aba740d8a88ff1d"</span> <span class="nt">-O</span> .config
-make menuconfig
-<span class="c"># Kernel hacking</span>
-<span class="c">#   -&gt; Generic Kernel Debugging Instruments</span>
-<span class="c">#     -&gt; KGDB: kernel debugger</span>
-<span class="c">#        y</span>
-make bzImage</code></pre></figure>
-
-<p>As you see, we checked out the same commit that syzbot used, under the same tree. We
-also used the same <em>.config</em> file to build the <em>bzImage</em>. Note that the assumption here is
-that your host is running Debian as well, which is the same system as the bot. In some
-builds it uses clang so the appropriated <em>CC=clang</em> flag should be used. Also, you could
-add a few debugging configurations to the kernel, since we’ll be using that <em>bzImage</em> to
-debug and investigate the root cause of the reported bug.</p>
-
-<p>Now that we have the <em>bzImage</em>, let’s use it to boot the <em>trixie.img</em> rootfs:</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
-<span class="nv">ROOTFS</span><span class="o">=</span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/trixie.img"</span>
-<span class="nv">BZIMAGE</span><span class="o">=</span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/linux/arch/x86/boot/bzImage"</span>
-qemu-system-x86_64 <span class="se">\</span>
-	<span class="nt">-m</span> 2G <span class="se">\</span>
-	<span class="nt">-smp</span> 2,sockets<span class="o">=</span>2,cores<span class="o">=</span>1 <span class="se">\</span>
-	<span class="nt">-net</span> nic,model<span class="o">=</span>e1000 <span class="se">\</span>
-	<span class="nt">-net</span> user,host<span class="o">=</span>10.0.2.25,hostfwd<span class="o">=</span>tcp::10022-:22 <span class="se">\</span>
-	<span class="nt">-enable-kvm</span> <span class="se">\</span>
-	<span class="nt">-nographic</span> <span class="se">\</span>
-	<span class="nt">-machine</span> pc-q35-7.1 <span class="se">\</span>
-	<span class="nt">-snapshot</span> <span class="se">\</span>
-	<span class="nt">-append</span> <span class="s2">"root=/dev/sda console=ttyS0 earlyprintk=serial net.ifnames=0"</span> <span class="se">\</span>
-	<span class="nt">-drive</span> <span class="nv">format</span><span class="o">=</span>raw,file<span class="o">=</span><span class="s2">"</span><span class="nv">$ROOTFS</span><span class="s2">"</span> <span class="se">\</span>
-	<span class="nt">-kernel</span> <span class="s2">"</span><span class="nv">$BZIMAGE</span><span class="s2">"</span></code></pre></figure>
-
-<p>This QEMU command will spawn a x86_64 virtual machine (of type pc-q35-7.1,
-<em>qemu-system-x86_64 -machine help</em> for more options) and boot your kernel into the
-trixie rootfs, make sure to point to the correct paths in the <em>$ROOTFS</em> and <em>$BZIMAGE</em>
-variables. This command is given as a reference in the Syzkaller’s
-<a href="https://github.com/google/syzkaller/blob/master/docs/syzbot.md#crash-does-not-reproduce">documentation</a>, however you should take a look at QEMU’s <a href="https://qemu-project.gitlab.io/qemu/index.html">manual
-pages</a> if you haven’t yet. You can see we passed both the kernel image and the
-rootfs disk as parameters, and since the <em>create-image.sh</em> script also take care of
-setting up networking and a SSH server for us (that’s why it also yields <em>trixie.id_rsa</em>
-and <em>trixie.id_rsa.pub</em>), the command will spawn a network interface with your local
-host 10022 port being forwarded into its 22 port through the <em>-net</em> argument. That means
-you can log into the guest system and transfer files through the ssh protocol using
-<em>localhost:10022</em>.</p>
-
-<p>Another important parameter is <em>-snapshot</em>. Using it means that whatever modification
-you do to the rootfs won’t be persisted through reboots. So if you transfer a file into
-it and halt the system, it won’t be there when you start a machine again with it. That
-makes possible for many guests running in parallel using the same rootfs. You could also
-remove this argument for one time in order to make changes such as changing the root
-password or installing a dependency. For example, if you want to reproduce bugs using
-the <em>syz</em> program reproducer you’re gonna need to build syzkaller locally and transfer
-the <em>bin/linux_amd64/syz-executor</em> and <em>bin/linux_amd64/syz-execprog</em> files into the rootfs,
-so you can transfer these files just once, without having to redo this step every time
-you boot a kernel.</p>
-
-<p>So now that the machine is running, you can go ahead and reproduce the bug in it. First,
-download the reproducer program, then transfer it into the rootfs and finally log into
-it through ssh (note that you could do this from inside the rootfs, by ssh’ing first):</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
-wget <span class="s2">"https://syzkaller.appspot.com/x/repro.c?x=14eb56dba80000"</span> <span class="nt">-O</span> reproducer.c
-<span class="nv">IDENTITY</span><span class="o">=</span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/trixie.img.id_rsa"</span>
-scp <span class="nt">-i</span> <span class="s2">"</span><span class="nv">$IDENTITY</span><span class="s2">"</span> <span class="nt">-P</span> 10022 reproducer.c root@localhost:~/
-ssh <span class="nt">-i</span> <span class="s2">"</span><span class="nv">$IDENTITY</span><span class="s2">"</span> <span class="nt">-p</span> 10022 root@localhost</code></pre></figure>
-
-<p>Now, inside the virtual machine simply build the program and run it:</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
-gcc <span class="nt">-Wall</span> reproducer.c <span class="nt">-o</span> reproducer
-./reproducer</code></pre></figure>
-
-<p>To make things easier, I always like to add aliases to my <em>~/.bashrc</em> whenever possible.
-They allow me to quickly go through the work without having to deal with the shell
-history or copy/pasting. Consider these:</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
-<span class="nb">alias </span>qemu-<span class="o">=</span><span class="s1">'qemu-system-x86_64 -m 2G -smp 2,sockets=2,cores=1 -net nic,model=e1000 -net user,host=10.0.2.25,hostfwd=tcp::10022-:22 -enable-kvm -nographic -machine pc-q35-7.1 -append "root=/dev/sda console=ttyS0 earlyprintk=serial net.ifnames=0" -snapshot -drive format=raw,file=/home/rbmarliere/images/syzkaller/trixie.img -kernel'</span>
-<span class="nb">alias </span>ssh-<span class="o">=</span><span class="s1">'ssh -i /home/rbmarliere/images/syzkaller/trixie.id_rsa -p 10022 root@localhost'</span>
-<span class="nb">alias </span>scp-<span class="o">=</span><span class="s1">'scp -i /home/rbmarliere/images/syzkaller/trixie.id_rsa -P 10022 '</span></code></pre></figure>
-
-<p>Lastly, to be able to really debug and step through the code with <a href="https://www.sourceware.org/gdb/documentation/"><em>gdb</em></a> you
-can use the <em>-s</em> argument to the QEMU command. That’s when a <em>vmlinux</em> image with
-debugging information is useful. Could be the one you downloaded from the syzbot bug
-report or the one you built before (if you enabled KGDB as suggested, you’re gonna be
-better equipped than using the image that syzbot provided). Start the virtual machine
-like before , appending the <em>-s</em> argument. Then, start <em>gdb</em> passing the <em>vmlinux</em> as
-argument:</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
-<span class="nv">VMLINUX</span><span class="o">=</span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/linux/vmlinux"</span>
-gdb <span class="nt">-tui</span> <span class="s2">"</span><span class="nv">$VMLINUX</span><span class="s2">"</span>
-
-<span class="c"># then, inside gdb shell:</span>
-target remote :1234</code></pre></figure>
-
-<p>To illustrate, below are two screenshots of this setup. It’s from a different bug than
-the one mentioned in this post, but it doesn’t matter. I set a breakpoint at the <em>panic</em>
-kernel function and then ran the reproducer:</p>
-
-<p><img src="/~ricardo/assets/gdb_setup.png" alt="gdb" />
-— <em>Here you can see the virtual machine’s console in the left, right before executing the
-reproducer, and the host’s gdb tui in the right.</em></p>
-
-<p><img src="/~ricardo/assets/gdb_panic.png" alt="gdb" />
-— <em>After executing the reproducer, the execution stops at the breakpoint we set
-before, at the panic() function in the kernel/panic.c file.</em></p>
-
-<p>After working your way to tackle the problem, you can apply a patch to your local tree,
-rebuild the kernel images and re-test with the reproducer until you get it right. Make
-sure to see if the problem wasn’t already fixed by someone else before sending the patch
-upstream, though. Anyway, we didn’t even scratch the surface here, but I hope this sheds
-light into basic debugging techniques and make you better equipped to explore your way
-into the kernel internals!</p>]]></content><author><name></name></author><category term="linux" /><category term="kernel" /><category term="mentorship" /><summary type="html"><![CDATA[Hello again!]]></summary></entry><entry><title type="html">Hello World</title><link href="https://marliere.net/~ricardo/about" rel="alternate" type="text/html" title="Hello World" /><published>2023-09-05T21:21:39-03:00</published><updated>2023-09-05T21:21:39-03:00</updated><id>https://marliere.net/~ricardo/hello-world</id><content type="html" xml:base="https://marliere.net/~ricardo/about"><![CDATA[<p>Greetings,</p>
-
-<p>For this first post I thought it would be best if I introduced myself. My name is
-Ricardo and I was born in Brazil in July of the year 1991. When I’m not at my desk
-studying about computers and technology or occasionally gaming, I like to <a href="https://pathos.band/">play
-guitar</a> and write songs. I have a small vinyl <a href="https://www.discogs.com/user/rbmarliere/collection">collection</a> and own a
-few vintage out of print esoteric books. On some weekends, if I’m lucky, I’ll be
-crossing the finish line in a racing car at a track somewhere. But more commonly I’ll be
-offline enjoying the company of my beautiful wife. I’m also a private pilot currently
-pursuing my IFR license. As you see, I’ve been dedicating my time across many interests,
-but my goal here is mostly to write about software, at least initially.</p>
-
-<p>I’m about just as much as old as the Linux project itself, and I was about 10 years old
-when I first learned that computers could be used for more than playing games, at a time
-when Brazilian internet providers were booming. By then, my older brother was already
-hacking around and he got me into mIRC Scripting. Maybe an odd choice for a first
-programming language, but I was determined to do what any kid would probably think about
-doing: create my own game, of course :). That natural curiosity and stubbornness was
-responsible for leading me down a path of experimental learning, which helped me create
-the solid foundation where I stand today. We truly stand on the shoulders of giants when
-it comes to software. Anyhow, I still remember the feeling of awe I had when my brother
-first brought home a Mandrake Linux CD-ROM. One of the first things I noted was that the
-mouse cursor was black! That was cool. Many years later, there I was at the university
-studying with classmates getting to know about programming for the first time. It felt
-weird, because it was so natural to me.</p>
-
-<p>After the mIRC days came the Linux exploring nights, trying to learn as much as I could
-out of the shell and the old C books my father had laying around. The major problem I
-had though, is that I also had to learn English. It was rather confusing but eventually
-I reached a ‘good enough’ point. I remember the first time I felt that I was actually
-having some better understanding was when I accepted the challenge of installing the
-recently launched Slackware 12. A few weeks later I would run <em>make menuconfig</em> on the
-2.6 kernel for the first time. Suffice to say that I wasn’t able to boot it. So begins
-my distro hopping days. I learned a lot those days, but I had a common teenager problem:
-focus. I wanted to do everything. I still do, but as you get older you learn to optimize
-your time and energy, while knowing yourself a bit more to define priorities more
-easily. But then, I decided that programming wasn’t for me and I got distracted with a
-million things. Mostly gaming and music.</p>
-
-<p>When I joined the university I wasn’t sure if I would pursue a Math, Physics or
-Computing degree. I flirted with those other areas only to be confronted with the harsh
-reality that I was pretty bad at it. My natural aptitude put me back on track to
-programming. I also was able to get my first job as a PHP web developer, after a year or
-so as a research mentee. In the 3.x kernel days my main driver was Linux Mint. At least
-until I bought a Macbook and decided to get my feet wet with audio engineering. I don’t
-regret it, but that has set me back another year or so.</p>
-
-<p>After getting tired of the Apple jail and a brief period of FreeBSD and Arch Linux,
-struggling to keep the system stable, I decided to give Gentoo and later Funtoo a spin
-with the 4.x kernels. I used that extensively for years. That’s when I first read about
-the development process within the Linux project. I also went through the first levels
-of the <a href="http://eudyptula-challenge.org/">Eudyptula Challenge</a> and the <a href="https://io.netgarage.org/">IO wargame</a>, which got me very
-excited after spending so much time in the web development maze.</p>
-
-<p>I’m happy to say that my distro hopping days are over though and Debian is my weapon of
-choice. I regret not taking the time earlier to read more about the project and its
-organization, but everything I did turned out to be exactly what I needed to learn at
-the time. As the old saying goes, all roads lead to Rome. In any case, I was busy in the
-last few years studying cryptocurrencies and finance in general, while hacking around
-with a lot of Python in between.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[Greetings,]]></summary></entry></feed>
+</html>
