@@ -192,17 +192,17 @@ rq -g --wait-gdb
 
 ## Kdump
 
-Recently I was looking into a [bug][pvr2_bug] that is a racing problem. That means that,
+Recently I was looking into a bug that is a concurrency problem. That means that,
 although the reproducer provided can in fact reproduce the problem, it happens at random
 times. That means you are probably gonna have to wait for a long time. So as much as the
-*gdb* workflow presented on the [last post][simple-workflow] is very useful, for bugs
+*gdb* workflow presented in the [last post][simple-workflow] is very useful, for bugs
 like this it can be quite painful. Using [Kdump][kdump-doc] and the [crash utility][crash] enabled me to inspect the system state at any time without having to depend on a running virtual machine.
 
 I went through this [excellent presentation][postmortem] by Steve Rostedt and I must
 say, it took me a while to grasp the process and setup everything. But its a very good
 tool to have, sometimes. Hopefully I can help you save some time. The first thing you
 need is to build a "crash" kernel. This is the kernel that it's going to replace the
-running kernel after a panic. Here is what I did:
+system kernel after a panic. Here is what I did:
 
 {% highlight bash %}
 #!/bin/bash
@@ -266,7 +266,7 @@ it. These are the symbols that need to be enabled to successfully boot the kerne
 a crash. Note that the ones marked with **\*** are dependencies for the root filesystem.
 Systemd needs CGROUPS and INOTIFY_USER and the others come from the */etc/fstab* written
 by the syzkaller's [create-image.sh][syzkaller-fstab] script that I used to create my
-root filesystem.
+root filesystem (therefore, optional).
 
 After this, you should install *kdump-tools* inside your VM:
 
@@ -332,7 +332,7 @@ gcc rep.c && ./a.out
 Note the need for *root=/dev/sda* for the automatic handling of the crash dump taking
 place. If all went well, you're gonna see the dump and the dmesg files under your host
 */var/crash* directory. But how to use it? Here enters the [crash utility][crash]. For
-some reason that I didn't fully understand, probably Debian related[^1], I was only able
+some reason that I didn't fully understand -- probably Debian related[^1] -- I was only able
 to inspect the dump file using a locally built binary. Therefore, don't install the
 [crash][crash-deb] package in your host.
 
@@ -492,7 +492,7 @@ spotted an error in here, please don't hesitate in reaching out to me at
 [*ricardo@marliere.net*][email].
 
 
-[^1]: AFAIK, kdump-tools is packaged with the clear use case of dumping a running Debian kernel and depends on the distro */boot/\** files
+[^1]: As far as I can tell, *kdump-tools* is packaged with the clear use case of dumping a running Debian kernel and depends on the distro */boot/\** files
 [simple-workflow]: {% link _posts/2023-09-06-simple-workflow.markdown %}
 
 [git-worktree]: https://git-scm.com/docs/git-worktree
@@ -502,7 +502,6 @@ spotted an error in here, please don't hesitate in reaching out to me at
 [email]: mailto:ricardo@marliere.net
 [seabios]: https://gitlab.com/qemu-project/seabios
 [seabios_patch]: https://github.com/cirosantilli/linux-kernel-module-cheat/issues/110#issuecomment-1498600775
-[pvr2_bug]: https://syzkaller.appspot.com/bug?extid=621409285c4156a009b3
 [crash]: https://github.com/crash-utility/crash
 [kdump-doc]: https://www.kernel.org/doc/html/latest/admin-guide/kdump/kdump.html
 [postmortem]: https://www.youtube.com/watch?v=aUGNDJPpUUg
