@@ -198,7 +198,7 @@ times. That means you are probably gonna have to wait for a long time. So as muc
 *gdb* workflow presented in the [last post][simple-workflow] is very useful, for bugs
 like this it can be quite painful. Using [Kdump][kdump-doc] and the [crash utility][crash] enabled me to inspect the system state at any time without having to depend on a running virtual machine.
 
-I went through this [excellent presentation][postmortem] by Steve Rostedt and I must
+I went through this [excellent presentation][postmortem] by Steven Rostedt and I must
 say, it took me a while to grasp the process and setup everything. But its a very good
 tool to have, sometimes. Hopefully I can help you save some time. The first thing you
 need is to build a "crash" kernel. This is the kernel that it's going to replace the

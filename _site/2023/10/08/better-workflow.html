@@ -230,7 +230,7 @@ times. That means you are probably gonna have to wait for a long time. So as muc
 <em>gdb</em> workflow presented in the <a href="/~ricardo/2023/09/06/simple-workflow.html">last post</a> is very useful, for bugs
 like this it can be quite painful. Using <a href="https://www.kernel.org/doc/html/latest/admin-guide/kdump/kdump.html">Kdump</a> and the <a href="https://github.com/crash-utility/crash">crash utility</a> enabled me to inspect the system state at any time without having to depend on a running virtual machine.</p>
 
-<p>I went through this <a href="https://www.youtube.com/watch?v=aUGNDJPpUUg">excellent presentation</a> by Steve Rostedt and I must
+<p>I went through this <a href="https://www.youtube.com/watch?v=aUGNDJPpUUg">excellent presentation</a> by Steven Rostedt and I must
 say, it took me a while to grasp the process and setup everything. But its a very good
 tool to have, sometimes. Hopefully I can help you save some time. The first thing you
 need is to build a “crash” kernel. This is the kernel that it’s going to replace the
