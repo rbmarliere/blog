@@ -2,14 +2,14 @@
 layout: post
 title: "Booting a minimal upstream kernel in a Raspberry Pi 3"
 date: 2023-10-12 10:05:00 -0300
-image: /~ricardo/assets/rpi.jpeg
+image: /~ricardo/assets/rpi.png
 tags: linux kernel mentorship
 ---
 
 In this post, I will go through the steps for building and booting a [linux-next][next]
 kernel on that board you have gathering dust somewhere.
 
-![raspberry](/~ricardo/assets/rpi.jpeg)
+![raspberry](/~ricardo/assets/rpi.png)
 
 --- **DISCLAIMER**: *The contents of this post may be severely outdated by the time you read
 them.*
