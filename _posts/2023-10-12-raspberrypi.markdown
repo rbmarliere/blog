@@ -2,6 +2,7 @@
 layout: post
 title: "Booting a minimal upstream kernel in a Raspberry Pi 3"
 date: 2023-10-12 10:05:00 -0300
+image: /~ricardo/assets/rpi.png
 tags: linux kernel mentorship
 ---
 
