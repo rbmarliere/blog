@@ -1,4 +1,332 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://marliere.net/~ricardo/feed.xml" rel="self" type="application/atom+xml" /><link href="https://marliere.net/~ricardo/" rel="alternate" type="text/html" /><updated>2023-10-09T18:04:42-03:00</updated><id>https://marliere.net/~ricardo/feed.xml</id><title type="html">Ricardo B. Marliere</title><subtitle>Yet another blog</subtitle><entry><title type="html">A better workflow for kernel debugging</title><link href="https://marliere.net/~ricardo/2023/10/08/better-workflow.html" rel="alternate" type="text/html" title="A better workflow for kernel debugging" /><published>2023-10-08T15:15:00-03:00</published><updated>2023-10-08T15:15:00-03:00</updated><id>https://marliere.net/~ricardo/2023/10/08/better-workflow</id><content type="html" xml:base="https://marliere.net/~ricardo/2023/10/08/better-workflow.html"><![CDATA[<p>If you followed along my last <a href="/~ricardo/2023/09/06/simple-workflow.html">post</a>, you may have have found some
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://marliere.net/~ricardo/feed.xml" rel="self" type="application/atom+xml" /><link href="https://marliere.net/~ricardo/" rel="alternate" type="text/html" /><updated>2023-10-12T10:13:00-03:00</updated><id>https://marliere.net/~ricardo/feed.xml</id><title type="html">Ricardo B. Marliere</title><subtitle>Yet another blog</subtitle><entry><title type="html">Booting a minimal upstream kernel in a Raspberry Pi 3</title><link href="https://marliere.net/~ricardo/2023/10/12/raspberrypi.html" rel="alternate" type="text/html" title="Booting a minimal upstream kernel in a Raspberry Pi 3" /><published>2023-10-12T10:05:00-03:00</published><updated>2023-10-12T10:05:00-03:00</updated><id>https://marliere.net/~ricardo/2023/10/12/raspberrypi</id><content type="html" xml:base="https://marliere.net/~ricardo/2023/10/12/raspberrypi.html"><![CDATA[<p>In this post, I will go through the steps for building and booting a <a href="https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/">linux-next</a>
+kernel on that board you have gathering dust somewhere.</p>
+
+<p><img src="/~ricardo/assets/rpi.png" alt="raspberry" /></p>
+
+<p>— <strong>DISCLAIMER</strong>: <em>The contents of this post may be severely outdated by the time you read
+them.</em></p>
+
+<p>Back in my <a href="https://www.funtoo.org">Funtoo</a> <sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup> days, I wrote a nasty <a href="https://github.com/rbmarliere/sysroot">script</a> to organize the
+steps required to have a functioning cross-compilation toolchain in order to build the
+<a href="https://github.com/raspberrypi/linux">vendor</a> kernel. It had all sort of weird things that I wanted to learn,
+such as embedding a dropbear ssh server in the initramfs and filesystem encryption. This
+time, I wanted to try a different approach: what is the minimum possible setup I can
+come up with to properly boot a root filesystem on the Pi?</p>
+
+<p>If you followed along my <a href="/~ricardo/2023/10/08/better-workflow.html">last post</a>, you noticed that I chose to
+configure a crash kernel to use with Kdump/Kexec from zero (<em>make allnoconfig</em>). Though
+time consuming and a bit frustrating at times, its something that teached me
+tremendously. The demanding trial and error process actually made me assimilate many key
+kernel configuration symbols and how they work together, it was a great exercise.</p>
+
+<p>This time, I knew that it wouldn’t be as simple as it were for a x86_64 virtual machine
+that emulates ancient hardware. With the Pi, I wanted to run an arm64 recent upstream
+kernel with the minimal possible amount of firmware aswell. Though there are many
+great <a href="https://www.raspberrypi.com/documentation/computers/linux_kernel.html">resources</a> <a href="https://elinux.org/RPi_Upstream_Kernel_Compilation">available</a>, I was on my own. Here is what I came up with.</p>
+
+<h2 id="debian-root-filesystem">Debian Root Filesystem</h2>
+
+<p>First things first, we need a system to boot into. For that, I chose
+<a href="https://tracker.debian.org/pkg/debootstrap">debootstrap</a> to create a full Debian system for the arm64 architecture.
+This way you can chroot into the filesystem and act freely before properly burning an
+image into an sd card. This is the process (all the variables in this post are
+illustrative):</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
+
+<span class="nv">ROOTFS_PATH</span><span class="o">=</span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/debian/arm64"</span>
+
+apt <span class="nb">install </span>debootstrap qemu-user-static binfmt-support qemu-system-arm
+
+debootstrap <span class="nt">--arch</span> arm64 <span class="se">\</span>
+            <span class="nt">--components</span><span class="o">=</span>main,contrib,non-free,non-free-firmware <span class="se">\</span>
+            <span class="nt">--foreign</span> <span class="se">\</span>
+            trixie <span class="se">\</span>
+            <span class="nv">$ROOTFS_PATH</span>
+
+<span class="nb">chroot</span> <span class="nv">$ROOTFS_PATH</span> bash <span class="nt">-c</span> <span class="s2">"/debootstrap/debootstrap --second-stage"</span></code></pre></figure>
+
+<ul>
+  <li>qemu-user-static is <a href="https://wiki.debian.org/EmDebian/CrossDebootstrap#QEMU.2Fdebootstrap_approach">needed</a> to actually be able to chroot into the root directory and
+execute the arm64 programs therein from a foreign host (in my case, x86_64).</li>
+  <li>“trixie” is the current <a href="https://www.debian.org/releases/">testing</a> distribution.</li>
+  <li>Notice the <em>--foreign</em> argument to debootstrap. This is needed because you’re building a
+root that is of an architecture that is different than your host’s. Because of that, an
+extra step is <a href="https://sources.debian.org/src/debootstrap/1.0.132/debootstrap.8/#L126">required</a> (the second stage).</li>
+</ul>
+
+<p>Now, add the <em>/etc/fstab</em> file while at it:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
+
+<span class="nb">echo</span> <span class="s2">"/dev/mmcblk0p2 / ext4 defaults,noatime 0 1"</span> <span class="o">&gt;</span> <span class="nv">$ROOTFS_PATH</span>/etc/fstab</code></pre></figure>
+
+<h2 id="kernel-build">Kernel build</h2>
+
+<p>You could build your kernel from inside the aarch64 <sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup> root, but that would have a hit on
+performance and also increase the size of the root with all the required packages to
+make it happen. We wanna keep things nice and clean. There are many <a href="https://kernel.org/pub/tools/crosstool/">options</a>
+of toolchains out there that you can use for cross-compilation. This is the Debian way:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
+
+apt <span class="nb">install </span>gcc-aarch64-linux-gnu</code></pre></figure>
+
+<p>If you haven’t yet, this is the time you actually pull the Linux sources. If you’re not
+familiar with the <a href="https://www.kernel.org/doc/man-pages/linux-next.html">linux-next</a> tree, that’s where the kernel developers merge
+their changes targeting the next <a href="https://www.kernel.org/doc/html/latest/process/2.Process.html">merge window</a>. Its goal is to be a reliable
+preview of what the next version will look like, thus it conveniently anticipate many
+common problems such as build errors and commit conflicts. Go ahead and setup your
+sources, with something like this – I can’t recommend <a href="https://git-scm.com/docs/git-worktree">git-worktrees</a>
+highly enough:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
+
+<span class="c"># create your local work directory</span>
+<span class="nv">LINUX_DIR</span><span class="o">=</span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/linux"</span>
+<span class="nb">mkdir</span> <span class="nv">$LINUX_DIR</span>
+<span class="nb">cd</span> <span class="nv">$LINUX_DIR</span>
+
+<span class="c"># clone a bare repository</span>
+git clone <span class="nt">--bare</span> <span class="nt">-o</span> linus git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+<span class="nb">cd </span>linux.git
+
+<span class="c"># add linux-next remote</span>
+git remote add next git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+
+<span class="c"># update all remotes</span>
+git remote update
+
+<span class="c"># add a worktree for the kernel you want to hack</span>
+git worktree add <span class="nt">--checkout</span> ../next-arm64 next-20231011
+<span class="nb">cd</span> ../next-arm64</code></pre></figure>
+
+<p>Now let’s export some variables. When you <a href="https://www.gnu.org/software/bash/manual/bash.html#Bourne-Shell-Builtins">export</a> a variable, it is passed down to
+the processes that you call, so <code class="language-plaintext highlighter-rouge">export ARCH=arm64; make</code> has the same effect as of
+<code class="language-plaintext highlighter-rouge">ARCH=arm64 make</code>. This is useful if you’re constantly running the same commands over
+and over again and don’t want a bloated sea of characters in your prompt.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
+
+<span class="c"># the target architecture</span>
+<span class="nb">export </span><span class="nv">ARCH</span><span class="o">=</span>arm64
+<span class="c"># fixed part of the binutils filenames from gcc-aarch64-linux-gnu package</span>
+<span class="nb">export </span><span class="nv">CROSS_COMPILE</span><span class="o">=</span>/usr/bin/aarch64-linux-gnu-
+<span class="c"># where the kernel will be installed to</span>
+<span class="nb">export </span><span class="nv">INSTALL_PATH</span><span class="o">=</span><span class="nv">$ROOTFS_PATH</span>/boot
+<span class="c"># where the modules will be installed to</span>
+<span class="nb">export </span><span class="nv">INSTALL_MOD_PATH</span><span class="o">=</span><span class="nv">$ROOTFS_PATH</span>
+<span class="c"># where the device tree bindings of the Pi will be installed to</span>
+<span class="nb">export </span><span class="nv">INSTALL_DTBS_PATH</span><span class="o">=</span><span class="nv">$ROOTFS_PATH</span>/boot</code></pre></figure>
+
+<p>All of these are properly documented <a href="https://www.kernel.org/doc/html/latest/kbuild/kbuild.html">here</a>, apart from the usual “<em>make help</em>”.
+There’s also some precious tips in the kernel <a href="https://www.kernel.org/doc/html/latest/kbuild/kconfig.html">documentation</a>, I wasn’t aware
+of the scripts/diffconfig tool before, which is very useful for messing around with
+configuration files. Also, inspecting old files with “<em>make listnewconfig</em>” can be
+specially useful when analyzing vendor defaults.</p>
+
+<p>Now comes the fun part, configuring the kernel:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
+
+make allnoconfig
+<span class="c"># from `make help`:</span>
+<span class="c"># allnoconfig     - New config where all options are answered with no</span>
+
+make menuconfig
+<span class="c"># TIP: when you search for a string using '/' character, the list provided</span>
+<span class="c"># have numbers attached to them, which you can use to quickly jump to its</span>
+<span class="c"># entry in the menu; you can also use '?' character for help.</span></code></pre></figure>
+
+<p>For starters, you need to enable support for the <a href="https://en.wikipedia.org/wiki/Raspberry_Pi#Model_comparison">chip</a>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ARCH_BCM             Broadcom System-on-Chip systems
+ARCH_BCM2835         BCM2837 and BCM2711 SoCs (Raspberry Pi 3 and 4)
+</code></pre></div></div>
+
+<p>Then, you might wanna see some output on the screen – through the HDMI port in my case:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DRM                  Direct Rendering Infrastructure, introduced in XFree86 4.0
+DRM_V3D              Broadcom V3D GPU
+DRM_FBDEV_EMULATION  Legacy fbdev emulation for DRM
+FB                   Frame buffer device abstraction layer
+FB_SIMPLE            Support for a simple framebuffer
+</code></pre></div></div>
+
+<p>Later, we will burn an image into a sd card and use it for booting, so we need support
+for it and also the EXT4 filesystem which will be used in the root partition:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>MMC                  MMC/SD/SDIO I/O support
+MMC_BCM2835          MultiMediaCard controller driver for the BCM2835
+EXT4_FS              Extended Filesystem 4th generation
+</code></pre></div></div>
+
+<p>After successfully recognizing the disk and the root partition, the kernel will call the
+<em>/sbin/init</em>, which in this case is a link to <em>/lib/systemd/systemd</em> <sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">3</a></sup>. For that, there
+are many requirements:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>BINFMT_ELF           Support for Executable and Linkable Format (ELF)
+DEVTMPFS             Early ramfs instance at bootup for /dev
+TMPFS                In-memory filesystem support
+CGROUPS              Process grouping isolation
+INOTIFY_USER         File monitoring interface for userspace
+NET                  Networking support
+UNIX                 Unix domain sockets
+</code></pre></div></div>
+
+<p>At this point you will land on a login prompt, but there will be no way of doing
+anything because you haven’t added support for input yet. Let’s say you want to use a
+simple USB keyboard, you first need to enable the features that permit the kernel to
+power and communicate with devices:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>MAILBOX              On-chip processors communication framework
+BCM2835_MBOX         Mailbox for the BCM2835 SoC
+RASPBERRYPI_FIRMWARE Support communication with the Raspberry Pi firmware
+RASPBERRYPI_POWER    Raspberry Pi power domain support
+PM                   Device Power Management core functionality
+</code></pre></div></div>
+
+<p>Then you can actually add the USB and HID buses:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>USB_SUPPORT          Core Universal Serial Bus (USB) support
+USB                  Enable host-side USB support
+USB_DWC2             Raspberry Pi 3 DWC2 USB Controller
+HID_SUPPORT          Human interface devices support
+</code></pre></div></div>
+
+<p>In my case, this is the driver I needed:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>INPUT_KEYBOARD       Enables keyboard drivers selection submenu
+KEYBOARD_ATKBD       Standard AT/PS2 keyboard
+</code></pre></div></div>
+
+<p>That’s it, should be enough to have a working root. Build and install the kernel now,
+making sure you have installed its <a href="https://www.kernel.org/doc/html/latest/process/changes.html">requirements</a>:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
+
+make <span class="nt">-j</span><span class="si">$(</span><span class="nb">nproc</span><span class="si">)</span>
+<span class="c"># make modules_install</span>
+make dtbs_install
+make <span class="nb">install</span></code></pre></figure>
+
+<h2 id="boot-loader">Boot Loader</h2>
+
+<p>To boot from a sd card, you need a vfat partition at the start of the disk containing
+the firmware files. This is gonna be the <em>/boot</em>, which have the kernel and the <a href="https://www.kernel.org/doc/html/latest/devicetree/usage-model.html">device
+tree blobs</a> already. You need three files from the vendor:</p>
+
+<ul>
+  <li><a href="https://github.com/raspberrypi/firmware/raw/master/boot/bootcode.bin">/boot/bootcode.bin</a></li>
+  <li><a href="https://github.com/raspberrypi/firmware/raw/master/boot/start.elf">/boot/start.elf</a></li>
+  <li><a href="https://github.com/raspberrypi/firmware/raw/master/boot/fixup.dat">/boot/fixup.dat</a></li>
+</ul>
+
+<p>So go ahead and download them into your arm64 root’s <em>/boot</em> directory:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
+
+wget https://github.com/raspberrypi/firmware/raw/master/boot/bootcode.bin <span class="nv">$ROOTFS_PATH</span>/boot
+wget https://github.com/raspberrypi/firmware/raw/master/boot/start.elf <span class="nv">$ROOTFS_PATH</span>/boot
+wget https://github.com/raspberrypi/firmware/raw/master/boot/fixup.dat <span class="nv">$ROOTFS_PATH</span>/boot</code></pre></figure>
+
+<p>Then, you need two configuration files:</p>
+
+<ul>
+  <li><a href="https://www.raspberrypi.com/documentation/computers/config_txt.html"><strong>/boot/config.txt</strong></a></li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>arm_64bit=1
+kernel=vmlinuz-6.6.0-rc5-next-20231011
+device_tree=/broadcom/bcm2837-rpi-3-b-plus.dtb
+</code></pre></div></div>
+
+<ul>
+  <li><strong>/boot/cmdline.txt</strong></li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root=/dev/mmcblk0p2 rootfstype=ext4 rootwait
+</code></pre></div></div>
+
+<h2 id="image-creation">Image Creation</h2>
+
+<p>Now that you have a fully functional root filesystem, it’s time to prepare it to go into
+the sd card so that the Pi can finally boot it:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
+
+apt <span class="nb">install </span>dosfstools  <span class="c"># mkfs.vfat</span>
+
+<span class="nb">dd </span><span class="k">if</span><span class="o">=</span>/dev/zero <span class="nv">of</span><span class="o">=</span>arm64.img <span class="nv">bs</span><span class="o">=</span>1M <span class="nv">count</span><span class="o">=</span>1024
+
+losetup <span class="nt">-fP</span> arm64.img
+losetup <span class="nt">-a</span>  <span class="c"># note which /dev/loopN is used, in my case N=0</span>
+
+cfdisk /dev/loop0
+<span class="c"># DOS partition scheme:</span>
+<span class="c">#   1: 128M, type: b (W95 FAT32), bootable</span>
+<span class="c">#   2: ++, type: 83 (Linux)</span>
+
+mkfs.vfat /dev/loop0p1
+mkfs.ext4 /dev/loop0p2
+
+<span class="nv">tmp</span><span class="o">=</span><span class="si">$(</span><span class="nb">mktemp</span> <span class="nt">-d</span><span class="si">)</span>
+mount /dev/loop0p2 <span class="nv">$tmp</span>
+mount /dev/loop0p1 <span class="nv">$tmp</span>/boot
+
+<span class="nb">cp</span> <span class="nt">-a</span> <span class="nv">$ROOTFS_PATH</span>/. <span class="nv">$tmp</span>/.
+
+umount <span class="nv">$tmp</span>/boot
+umount <span class="nv">$tmp</span>
+
+<span class="nb">sync
+
+</span>losetup <span class="nt">-d</span> /dev/loop0
+
+<span class="c"># replace &lt;SD_CARD&gt; with the correct value on your system</span>
+<span class="nb">dd </span><span class="k">if</span><span class="o">=</span>arm64.img <span class="nv">of</span><span class="o">=</span>/dev/&lt;SD_CARD&gt; <span class="nv">status</span><span class="o">=</span>progress</code></pre></figure>
+
+<h2 id="whats-next">What’s next?</h2>
+
+<p>Well, there are many things to explore if you want to keep tinkering with the kernel
+configuration symbols. For example, you could decide to add the <em>/dev/mmcblk0p1</em> boot
+partition to your <em>/etc/fstab</em>, but that requires VFAT support:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>VFAT_FS              VFAT (Windows-95) fs support
+NLS_CODEPAGE_437     Default DOS codepage
+NLS_ISO8859_1        ISO/IEC 8859-1 character set
+</code></pre></div></div>
+
+<p>Maybe you want to figure out what’s needed for complete networking support, or
+learn more about <a href="https://elinux.org/RPi_Low-level_peripherals">GPIO</a>.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Knowing exactly what you’re enabling on the kernel and being able to actually boot it
+can give you important insight about the different areas of knowledge that spans this
+vast project. You’ll be able to quickly find your way into whatever feature that you
+might wanna learn about more. Although a nice exercise, you’re probably better off with
+the <a href="https://www.raspberrypi.com/documentation/computers/config_txt.html">vendor configuration</a> as a starting point. There will be many things
+there that you’re probably not gonna use, but most of what you need will also be there.
+Overall, this is one of the trade-offs distro kernel teams have to deal with.</p>
+
+<p>If you have any question, comment, critic, suggestion or if you spotted an error in
+here, please don’t hesitate in reaching out to me at <a href="mailto:ricardo@marliere.net">ricardo@marliere.net</a>.
+Good luck and happy hacking!</p>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+      <p>Funtoo is a Gentoo fork made by Gentoo’s creator, Daniel Robbins. <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:2" role="doc-endnote">
+      <p><a href="https://developer.arm.com/documentation/ddi0487/latest/">AArch64</a> is the same as ARM64. <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:3" role="doc-endnote">
+      <p>lib/systemd/systemd: ELF 64-bit LSB pie executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, (…) <a href="#fnref:3" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>]]></content><author><name></name></author><category term="linux" /><category term="kernel" /><category term="mentorship" /><summary type="html"><![CDATA[In this post, I will go through the steps for building and booting a linux-next kernel on that board you have gathering dust somewhere.]]></summary></entry><entry><title type="html">A better workflow for kernel debugging</title><link href="https://marliere.net/~ricardo/2023/10/08/better-workflow.html" rel="alternate" type="text/html" title="A better workflow for kernel debugging" /><published>2023-10-08T15:15:00-03:00</published><updated>2023-10-08T15:15:00-03:00</updated><id>https://marliere.net/~ricardo/2023/10/08/better-workflow</id><content type="html" xml:base="https://marliere.net/~ricardo/2023/10/08/better-workflow.html"><![CDATA[<p>If you followed along my last <a href="/~ricardo/2023/09/06/simple-workflow.html">post</a>, you may have have found some
 difficulties like I did. Namely, making sure the work is done without confusion. In this
 post I want to share a few tips that helped me stay organized and effective, I hope its
 helpful to some of you as well.</p>
