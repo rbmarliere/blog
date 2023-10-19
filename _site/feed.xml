@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://marliere.net/~ricardo/feed.xml" rel="self" type="application/atom+xml" /><link href="https://marliere.net/~ricardo/" rel="alternate" type="text/html" /><updated>2023-10-12T10:25:31-03:00</updated><id>https://marliere.net/~ricardo/feed.xml</id><title type="html">Ricardo B. Marliere</title><subtitle>Yet another blog</subtitle><entry><title type="html">Booting a minimal upstream kernel in a Raspberry Pi 3</title><link href="https://marliere.net/~ricardo/2023/10/12/raspberrypi.html" rel="alternate" type="text/html" title="Booting a minimal upstream kernel in a Raspberry Pi 3" /><published>2023-10-12T10:05:00-03:00</published><updated>2023-10-12T10:05:00-03:00</updated><id>https://marliere.net/~ricardo/2023/10/12/raspberrypi</id><content type="html" xml:base="https://marliere.net/~ricardo/2023/10/12/raspberrypi.html"><![CDATA[<p>In this post, I will go through the steps for building and booting a <a href="https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/">linux-next</a>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://marliere.net/~ricardo/feed.xml" rel="self" type="application/atom+xml" /><link href="https://marliere.net/~ricardo/" rel="alternate" type="text/html" /><updated>2023-10-19T18:22:44-03:00</updated><id>https://marliere.net/~ricardo/feed.xml</id><title type="html">Ricardo B. Marliere</title><subtitle>Yet another blog</subtitle><entry><title type="html">Booting a minimal upstream kernel in a Raspberry Pi 3</title><link href="https://marliere.net/~ricardo/2023/10/12/raspberrypi.html" rel="alternate" type="text/html" title="Booting a minimal upstream kernel in a Raspberry Pi 3" /><published>2023-10-12T10:05:00-03:00</published><updated>2023-10-12T10:05:00-03:00</updated><id>https://marliere.net/~ricardo/2023/10/12/raspberrypi</id><content type="html" xml:base="https://marliere.net/~ricardo/2023/10/12/raspberrypi.html"><![CDATA[<p>In this post, I will go through the steps for building and booting a <a href="https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/">linux-next</a>
 kernel on that board you have gathering dust somewhere.</p>
 
 <p><img src="/~ricardo/assets/rpi.png" alt="raspberry" /></p>
@@ -208,7 +208,8 @@ making sure you have installed its <a href="https://www.kernel.org/doc/html/late
 make <span class="nt">-j</span><span class="si">$(</span><span class="nb">nproc</span><span class="si">)</span>
 <span class="c"># make modules_install</span>
 make dtbs_install
-make <span class="nb">install</span></code></pre></figure>
+make <span class="nb">install</span>
+<span class="c"># ...or make bindeb-pkg, of course :)</span></code></pre></figure>
 
 <h2 id="boot-loader">Boot Loader</h2>
 
@@ -306,7 +307,7 @@ learn more about <a href="https://elinux.org/RPi_Low-level_peripherals">GPIO</a>
 can give you important insight about the different areas of knowledge that spans this
 vast project. You’ll be able to quickly find your way into whatever feature that you
 might wanna learn about more. Although a nice exercise, you’re probably better off with
-the <a href="https://www.raspberrypi.com/documentation/computers/config_txt.html">vendor configuration</a> as a starting point. There will be many things
+the <a href="https://raw.githubusercontent.com/raspberrypi/linux/rpi-6.1.y/arch/arm64/configs/bcm2711_defconfig">vendor configuration</a> as a starting point. There will be many things
 there that you’re probably not gonna use, but most of what you need will also be there.
 Overall, this is one of the trade-offs distro kernel teams have to deal with.</p>
 

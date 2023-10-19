@@ -235,6 +235,7 @@ make -j$(nproc)
 # make modules_install
 make dtbs_install
 make install
+# ...or make bindeb-pkg, of course :)
 {% endhighlight %}
 
 ## Boot Loader
@@ -334,7 +335,7 @@ Knowing exactly what you're enabling on the kernel and being able to actually bo
 can give you important insight about the different areas of knowledge that spans this
 vast project. You'll be able to quickly find your way into whatever feature that you
 might wanna learn about more. Although a nice exercise, you're probably better off with
-the [vendor configuration][rpi-config] as a starting point. There will be many things
+the [vendor configuration][rpi-kconfig] as a starting point. There will be many things
 there that you're probably not gonna use, but most of what you need will also be there.
 Overall, this is one of the trade-offs distro kernel teams have to deal with.
 
@@ -356,7 +357,7 @@ Good luck and happy hacking!
 [crosstool]: https://kernel.org/pub/tools/crosstool/
 [bash-docs]: https://www.gnu.org/software/bash/manual/bash.html#Bourne-Shell-Builtins
 [elinux-kernel]: https://elinux.org/RPi_Upstream_Kernel_Compilation
-[rpi-config]: https://raw.githubusercontent.com/raspberrypi/linux/rpi-6.1.y/arch/arm64/configs/bcm2711_defconfig
+[rpi-kconfig]: https://raw.githubusercontent.com/raspberrypi/linux/rpi-6.1.y/arch/arm64/configs/bcm2711_defconfig
 [arm-docs]: https://developer.arm.com/documentation/ddi0487/latest/
 [debootstrap-docs]: https://sources.debian.org/src/debootstrap/1.0.132/debootstrap.8/#L126
 [deb-qemu]: https://wiki.debian.org/EmDebian/CrossDebootstrap#QEMU.2Fdebootstrap_approach

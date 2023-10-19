@@ -262,7 +262,8 @@ making sure you have installed its <a href="https://www.kernel.org/doc/html/late
 make <span class="nt">-j</span><span class="si">$(</span><span class="nb">nproc</span><span class="si">)</span>
 <span class="c"># make modules_install</span>
 make dtbs_install
-make <span class="nb">install</span></code></pre></figure>
+make <span class="nb">install</span>
+<span class="c"># ...or make bindeb-pkg, of course :)</span></code></pre></figure>
 
 <h2 id="boot-loader">Boot Loader</h2>
 
@@ -360,7 +361,7 @@ learn more about <a href="https://elinux.org/RPi_Low-level_peripherals">GPIO</a>
 can give you important insight about the different areas of knowledge that spans this
 vast project. You’ll be able to quickly find your way into whatever feature that you
 might wanna learn about more. Although a nice exercise, you’re probably better off with
-the <a href="https://www.raspberrypi.com/documentation/computers/config_txt.html">vendor configuration</a> as a starting point. There will be many things
+the <a href="https://raw.githubusercontent.com/raspberrypi/linux/rpi-6.1.y/arch/arm64/configs/bcm2711_defconfig">vendor configuration</a> as a starting point. There will be many things
 there that you’re probably not gonna use, but most of what you need will also be there.
 Overall, this is one of the trade-offs distro kernel teams have to deal with.</p>
 
