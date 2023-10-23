@@ -1,4 +1,83 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://marliere.net/~ricardo/feed.xml" rel="self" type="application/atom+xml" /><link href="https://marliere.net/~ricardo/" rel="alternate" type="text/html" /><updated>2023-10-19T18:22:44-03:00</updated><id>https://marliere.net/~ricardo/feed.xml</id><title type="html">Ricardo B. Marliere</title><subtitle>Yet another blog</subtitle><entry><title type="html">Booting a minimal upstream kernel in a Raspberry Pi 3</title><link href="https://marliere.net/~ricardo/2023/10/12/raspberrypi.html" rel="alternate" type="text/html" title="Booting a minimal upstream kernel in a Raspberry Pi 3" /><published>2023-10-12T10:05:00-03:00</published><updated>2023-10-12T10:05:00-03:00</updated><id>https://marliere.net/~ricardo/2023/10/12/raspberrypi</id><content type="html" xml:base="https://marliere.net/~ricardo/2023/10/12/raspberrypi.html"><![CDATA[<p>In this post, I will go through the steps for building and booting a <a href="https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/">linux-next</a>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://marliere.net/~ricardo/feed.xml" rel="self" type="application/atom+xml" /><link href="https://marliere.net/~ricardo/" rel="alternate" type="text/html" /><updated>2023-10-23T17:04:24-03:00</updated><id>https://marliere.net/~ricardo/feed.xml</id><title type="html">Ricardo B. Marliere</title><subtitle>Yet another blog</subtitle><entry><title type="html">Booting the Raspberry Pi 3 from the network</title><link href="https://marliere.net/~ricardo/2023/10/23/netbooting-the-rpi.html" rel="alternate" type="text/html" title="Booting the Raspberry Pi 3 from the network" /><published>2023-10-23T17:00:00-03:00</published><updated>2023-10-23T17:00:00-03:00</updated><id>https://marliere.net/~ricardo/2023/10/23/netbooting-the-rpi</id><content type="html" xml:base="https://marliere.net/~ricardo/2023/10/23/netbooting-the-rpi.html"><![CDATA[<p>The use case is simple: boot a kernel from <a href="https://tracker.debian.org/pkg/tftpd-hpa">tftp</a>, mount a root filesystem through
+<a href="https://www.kernel.org/doc/Documentation/filesystems/nfs/nfsroot.txt">NFS</a>. From the minimal kernel built <a href="/~ricardo/2023/10/12/raspberrypi.html">before</a>, you need those symbols:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>INPUT_KEYBOARD       Enables keyboard drivers selection submenu
+INET                 TCP/IP networking
+NFS_FS               Network FS client support (v3)
+IP_PNP               Automatic IP configuration
+IP_PNP_DHCP          DHCP for IP auto config
+ROOT_NFS             Root FS through NFS
+
+NETDEVICES           Network device support
+USB_USBNET           USB Networking
+USB_NET_SMSC95XX     SMSC LAN95XX Ethernet adapter driver
+</code></pre></div></div>
+
+<p>You could drop MMC, since you only need a single FAT32 partition containing the
+<a href="https://u-boot.readthedocs.io/en/latest/usage/index.html#shell-commands">bootloader</a> and firmware:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>start.elf
+bootcode.bin
+fixup.dat
+config.txt
+u-boot.bin
+boot.scr
+</code></pre></div></div>
+
+<p>The first three are the same firmware files from before and <strong>config.txt</strong> will have the
+following content:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>arm_64bit=1
+kernel=u-boot.bin
+</code></pre></div></div>
+
+<p>After <a href="https://source.denx.de/u-boot/u-boot">building</a> <strong>u-boot.bin</strong>, go ahead and create a <strong>boot.cmd</strong> script
+file like so:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>setenv serverip 192.168.1.100
+setenv ipaddr 192.168.1.101
+setenv bootargs root=/dev/nfs rw nfsroot=192.168.1.100:/exports/aarch64,nfsvers=3 ip=dhcp
+tftpboot ${fdt_addr_r} dtb
+tftpboot ${kernel_addr_r} kernel
+booti ${kernel_addr_r} - ${fdt_addr_r}
+</code></pre></div></div>
+
+<p>Build it with:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$GIT_DIR/u-boot/tools/mkimage -A arm64 -O linux -T script -C none -d boot.cmd boot.scr
+</code></pre></div></div>
+
+<p>This script assumes that your host 192.168.1.100 serves both <a href="https://tracker.debian.org/pkg/tftpd-hpa">tftp</a> and
+<a href="https://tracker.debian.org/pkg/nfs-utils">nfs-kernel-server</a>. You need something like this in your <strong>/etc/exports</strong> file:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/exports/aarch64 *(rw,sync,no_root_squash,no_subtree_check)
+</code></pre></div></div>
+
+<p>It also expects both <strong>dtb</strong> and <strong>kernel</strong> files to be present in the tftp share root.
+Instead of pin-pointing to version names, you can use symbolic links, e.g.:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd /srv/tftp
+ln -s vmlinuz-6.6.0-rc1+ kernel
+ln -s broadcom/bcm2837-rpi-3-b.dtb dtb
+</code></pre></div></div>
+
+<p>The links can’t point to outside the share root, though.</p>
+
+<p><img src="/~ricardo/assets/rpi_nfs.png" alt="nfs" />
+— <em>Profit.</em></p>
+
+<p> </p>
+
+<hr />
+
+<p> </p>
+
+<h4 id="references">References</h4>
+<ul>
+  <li><a href="https://elinux.org/RPi_U-Boot">https://elinux.org/RPi_U-Boot</a></li>
+  <li><a href="https://sergioprado.org/utilizando-o-u-boot-na-raspberry-pi/">https://sergioprado.org/utilizando-o-u-boot-na-raspberry-pi/</a></li>
+  <li><a href="https://github.com/mhomran/u-boot-rpi3-b-plus">https://github.com/mhomran/u-boot-rpi3-b-plus</a></li>
+</ul>]]></content><author><name></name></author><category term="linux" /><category term="kernel" /><category term="mentorship" /><summary type="html"><![CDATA[The use case is simple: boot a kernel from tftp, mount a root filesystem through NFS. From the minimal kernel built before, you need those symbols:]]></summary></entry><entry><title type="html">Booting a minimal upstream kernel in a Raspberry Pi 3</title><link href="https://marliere.net/~ricardo/2023/10/12/raspberrypi.html" rel="alternate" type="text/html" title="Booting a minimal upstream kernel in a Raspberry Pi 3" /><published>2023-10-12T10:05:00-03:00</published><updated>2023-10-12T10:05:00-03:00</updated><id>https://marliere.net/~ricardo/2023/10/12/raspberrypi</id><content type="html" xml:base="https://marliere.net/~ricardo/2023/10/12/raspberrypi.html"><![CDATA[<p>In this post, I will go through the steps for building and booting a <a href="https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/">linux-next</a>
 kernel on that board you have gathering dust somewhere.</p>
 
 <p><img src="/~ricardo/assets/rpi.png" alt="raspberry" /></p>
@@ -239,7 +318,7 @@ wget https://github.com/raspberrypi/firmware/raw/master/boot/fixup.dat <span cla
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>arm_64bit=1
 kernel=vmlinuz-6.6.0-rc5-next-20231011
-device_tree=/broadcom/bcm2837-rpi-3-b-plus.dtb
+device_tree=/broadcom/bcm2837-rpi-3-b.dtb
 </code></pre></div></div>
 
 <ul>
@@ -763,13 +842,18 @@ crash&gt; ps
 <span class="c"># function to get maintainer for a patch from anywhere</span>
 get_maintainer<span class="o">()</span> <span class="o">{</span>
 	<span class="k">if</span> <span class="o">[</span> <span class="nt">-z</span> <span class="s2">"</span><span class="nv">$1</span><span class="s2">"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then
-		</span><span class="nb">echo</span> <span class="s2">"usage: get_maintainer &lt;patch&gt;"</span>
+		</span><span class="nb">echo</span> <span class="s2">"usage: get_maintainer &lt;patch&gt; &lt;opts&gt;"</span>
 		<span class="k">return
 	fi
-	</span><span class="nv">patch</span><span class="o">=</span><span class="si">$(</span><span class="nb">realpath</span> <span class="s2">"</span><span class="nv">$1</span><span class="s2">"</span><span class="si">)</span>
-	<span class="nb">pushd</span> <span class="nv">$LINUX_DIR</span>/linus <span class="o">&gt;</span> /dev/null  <span class="c"># assumes a 'linus' worktree there</span>
-	scripts/get_maintainer.pl <span class="s2">"</span><span class="nv">$patch</span><span class="s2">"</span>
-	<span class="nb">popd</span> <span class="o">&gt;</span> /dev/null
+	</span><span class="nv">patch</span><span class="o">=</span><span class="si">$(</span><span class="nb">realpath</span> <span class="nv">$1</span><span class="si">)</span>
+	<span class="nb">shift </span>1
+	<span class="k">if</span> <span class="o">[[</span> <span class="nt">-f</span> scripts/get_maintainer.pl <span class="o">]]</span><span class="p">;</span> <span class="k">then
+		</span>scripts/get_maintainer.pl <span class="s2">"</span><span class="nv">$patch</span><span class="s2">"</span> <span class="nv">$*</span>
+	<span class="k">else
+		</span><span class="nb">pushd</span> <span class="nv">$LINUX_DIR</span>/linus <span class="o">&gt;</span> /dev/null  <span class="c"># assumes a 'linus' worktree there</span>
+		scripts/get_maintainer.pl <span class="s2">"</span><span class="nv">$patch</span><span class="s2">"</span> <span class="nv">$*</span>
+		<span class="nb">popd</span> <span class="o">&gt;</span> /dev/null
+	<span class="k">fi</span>
 <span class="o">}</span>
 
 <span class="c"># enables the use of `cd bugs` from anywhere</span>

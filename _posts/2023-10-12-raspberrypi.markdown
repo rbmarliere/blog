@@ -265,7 +265,7 @@ Then, you need two configuration files:
 ```
 arm_64bit=1
 kernel=vmlinuz-6.6.0-rc5-next-20231011
-device_tree=/broadcom/bcm2837-rpi-3-b-plus.dtb
+device_tree=/broadcom/bcm2837-rpi-3-b.dtb
 ```
 
 - **/boot/cmdline.txt**

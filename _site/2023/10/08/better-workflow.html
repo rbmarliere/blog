@@ -486,13 +486,18 @@ crash&gt; ps
 <span class="c"># function to get maintainer for a patch from anywhere</span>
 get_maintainer<span class="o">()</span> <span class="o">{</span>
 	<span class="k">if</span> <span class="o">[</span> <span class="nt">-z</span> <span class="s2">"</span><span class="nv">$1</span><span class="s2">"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then
-		</span><span class="nb">echo</span> <span class="s2">"usage: get_maintainer &lt;patch&gt;"</span>
+		</span><span class="nb">echo</span> <span class="s2">"usage: get_maintainer &lt;patch&gt; &lt;opts&gt;"</span>
 		<span class="k">return
 	fi
-	</span><span class="nv">patch</span><span class="o">=</span><span class="si">$(</span><span class="nb">realpath</span> <span class="s2">"</span><span class="nv">$1</span><span class="s2">"</span><span class="si">)</span>
-	<span class="nb">pushd</span> <span class="nv">$LINUX_DIR</span>/linus <span class="o">&gt;</span> /dev/null  <span class="c"># assumes a 'linus' worktree there</span>
-	scripts/get_maintainer.pl <span class="s2">"</span><span class="nv">$patch</span><span class="s2">"</span>
-	<span class="nb">popd</span> <span class="o">&gt;</span> /dev/null
+	</span><span class="nv">patch</span><span class="o">=</span><span class="si">$(</span><span class="nb">realpath</span> <span class="nv">$1</span><span class="si">)</span>
+	<span class="nb">shift </span>1
+	<span class="k">if</span> <span class="o">[[</span> <span class="nt">-f</span> scripts/get_maintainer.pl <span class="o">]]</span><span class="p">;</span> <span class="k">then
+		</span>scripts/get_maintainer.pl <span class="s2">"</span><span class="nv">$patch</span><span class="s2">"</span> <span class="nv">$*</span>
+	<span class="k">else
+		</span><span class="nb">pushd</span> <span class="nv">$LINUX_DIR</span>/linus <span class="o">&gt;</span> /dev/null  <span class="c"># assumes a 'linus' worktree there</span>
+		scripts/get_maintainer.pl <span class="s2">"</span><span class="nv">$patch</span><span class="s2">"</span> <span class="nv">$*</span>
+		<span class="nb">popd</span> <span class="o">&gt;</span> /dev/null
+	<span class="k">fi</span>
 <span class="o">}</span>
 
 <span class="c"># enables the use of `cd bugs` from anywhere</span>

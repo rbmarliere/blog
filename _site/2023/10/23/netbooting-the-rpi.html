@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Booting the Raspberry Pi 3 from the network | Ricardo B. Marliere</title>
+<meta name="generator" content="Jekyll v4.3.2" />
+<meta property="og:title" content="Booting the Raspberry Pi 3 from the network" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="The use case is simple: boot a kernel from tftp, mount a root filesystem through NFS. From the minimal kernel built before, you need those symbols:" />
+<meta property="og:description" content="The use case is simple: boot a kernel from tftp, mount a root filesystem through NFS. From the minimal kernel built before, you need those symbols:" />
+<link rel="canonical" href="https://marliere.net/~ricardo/2023/10/23/netbooting-the-rpi.html" />
+<meta property="og:url" content="https://marliere.net/~ricardo/2023/10/23/netbooting-the-rpi.html" />
+<meta property="og:site_name" content="Ricardo B. Marliere" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-10-23T17:00:00-03:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Booting the Raspberry Pi 3 from the network" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2023-10-23T17:00:00-03:00","datePublished":"2023-10-23T17:00:00-03:00","description":"The use case is simple: boot a kernel from tftp, mount a root filesystem through NFS. From the minimal kernel built before, you need those symbols:","headline":"Booting the Raspberry Pi 3 from the network","mainEntityOfPage":{"@type":"WebPage","@id":"https://marliere.net/~ricardo/2023/10/23/netbooting-the-rpi.html"},"url":"https://marliere.net/~ricardo/2023/10/23/netbooting-the-rpi.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/~ricardo/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://marliere.net/~ricardo/feed.xml" title="Ricardo B. Marliere" /></head>
+<body><header class="site-header">
+  <div class="wrapper"><a class="site-title" rel="author" href="/~ricardo/">Ricardo B. Marliere</a>
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+        <div class="trigger">
+          <a class="page-link" href="/~ricardo/about">About</a>
+          <a class="page-link" href="/">Contact</a>
+        </div>
+      </nav>
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Booting the Raspberry Pi 3 from the network</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2023-10-23T17:00:00-03:00" itemprop="datePublished">Oct 23, 2023
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>The use case is simple: boot a kernel from <a href="https://tracker.debian.org/pkg/tftpd-hpa">tftp</a>, mount a root filesystem through
+<a href="https://www.kernel.org/doc/Documentation/filesystems/nfs/nfsroot.txt">NFS</a>. From the minimal kernel built <a href="/~ricardo/2023/10/12/raspberrypi.html">before</a>, you need those symbols:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>INPUT_KEYBOARD       Enables keyboard drivers selection submenu
+INET                 TCP/IP networking
+NFS_FS               Network FS client support (v3)
+IP_PNP               Automatic IP configuration
+IP_PNP_DHCP          DHCP for IP auto config
+ROOT_NFS             Root FS through NFS
+
+NETDEVICES           Network device support
+USB_USBNET           USB Networking
+USB_NET_SMSC95XX     SMSC LAN95XX Ethernet adapter driver
+</code></pre></div></div>
+
+<p>You could drop MMC, since you only need a single FAT32 partition containing the
+<a href="https://u-boot.readthedocs.io/en/latest/usage/index.html#shell-commands">bootloader</a> and firmware:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>start.elf
+bootcode.bin
+fixup.dat
+config.txt
+u-boot.bin
+boot.scr
+</code></pre></div></div>
+
+<p>The first three are the same firmware files from before and <strong>config.txt</strong> will have the
+following content:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>arm_64bit=1
+kernel=u-boot.bin
+</code></pre></div></div>
+
+<p>After <a href="https://source.denx.de/u-boot/u-boot">building</a> <strong>u-boot.bin</strong>, go ahead and create a <strong>boot.cmd</strong> script
+file like so:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>setenv serverip 192.168.1.100
+setenv ipaddr 192.168.1.101
+setenv bootargs root=/dev/nfs rw nfsroot=192.168.1.100:/exports/aarch64,nfsvers=3 ip=dhcp
+tftpboot ${fdt_addr_r} dtb
+tftpboot ${kernel_addr_r} kernel
+booti ${kernel_addr_r} - ${fdt_addr_r}
+</code></pre></div></div>
+
+<p>Build it with:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$GIT_DIR/u-boot/tools/mkimage -A arm64 -O linux -T script -C none -d boot.cmd boot.scr
+</code></pre></div></div>
+
+<p>This script assumes that your host 192.168.1.100 serves both <a href="https://tracker.debian.org/pkg/tftpd-hpa">tftp</a> and
+<a href="https://tracker.debian.org/pkg/nfs-utils">nfs-kernel-server</a>. You need something like this in your <strong>/etc/exports</strong> file:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/exports/aarch64 *(rw,sync,no_root_squash,no_subtree_check)
+</code></pre></div></div>
+
+<p>It also expects both <strong>dtb</strong> and <strong>kernel</strong> files to be present in the tftp share root.
+Instead of pin-pointing to version names, you can use symbolic links, e.g.:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd /srv/tftp
+ln -s vmlinuz-6.6.0-rc1+ kernel
+ln -s broadcom/bcm2837-rpi-3-b.dtb dtb
+</code></pre></div></div>
+
+<p>The links can’t point to outside the share root, though.</p>
+
+<p><img src="/~ricardo/assets/rpi_nfs.png" alt="nfs" />
+— <em>Profit.</em></p>
+
+<p> </p>
+
+<hr />
+
+<p> </p>
+
+<h4 id="references">References</h4>
+<ul>
+  <li><a href="https://elinux.org/RPi_U-Boot">https://elinux.org/RPi_U-Boot</a></li>
+  <li><a href="https://sergioprado.org/utilizando-o-u-boot-na-raspberry-pi/">https://sergioprado.org/utilizando-o-u-boot-na-raspberry-pi/</a></li>
+  <li><a href="https://github.com/mhomran/u-boot-rpi3-b-plus">https://github.com/mhomran/u-boot-rpi3-b-plus</a></li>
+</ul>
+
+
+  </div><a class="u-url" href="/~ricardo/2023/10/23/netbooting-the-rpi.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+    <div style="text-align: center; font-size: 12px;">
+      <p>
+        This blog is powered by <a href="https://jekyllrb.com">Jekyll</a>.
+        <br/>
+        Source code is <a href="https://github.com/rbmarliere/blog">available</a> under MIT License.
+        <br/>
+        All original writing licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+      </p>
+      <p class="feed-subscribe">
+        <a href="https://marliere.net/~ricardo/feed.xml">
+          <svg class="svg-icon orange">
+            <use xlink:href="/~ricardo/assets/minima-social-icons.svg#rss"></use>
+          </svg>
+        </a>
+      </p>
+    </div>
+</footer>
+</body>
+
+</html>

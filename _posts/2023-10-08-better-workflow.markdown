@@ -465,13 +465,18 @@ LINUX_DIR=~/linux
 # function to get maintainer for a patch from anywhere
 get_maintainer() {
 	if [ -z "$1" ]; then
-		echo "usage: get_maintainer <patch>"
+		echo "usage: get_maintainer <patch> <opts>"
 		return
 	fi
-	patch=$(realpath "$1")
-	pushd $LINUX_DIR/linus > /dev/null  # assumes a 'linus' worktree there
-	scripts/get_maintainer.pl "$patch"
-	popd > /dev/null
+	patch=$(realpath $1)
+	shift 1
+	if [[ -f scripts/get_maintainer.pl ]]; then
+		scripts/get_maintainer.pl "$patch" $*
+	else
+		pushd $LINUX_DIR/linus > /dev/null  # assumes a 'linus' worktree there
+		scripts/get_maintainer.pl "$patch" $*
+		popd > /dev/null
+	fi
 }
 
 # enables the use of `cd bugs` from anywhere
