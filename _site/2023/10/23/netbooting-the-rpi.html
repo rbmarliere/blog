@@ -53,13 +53,11 @@
     <p>The use case is simple: boot a kernel from <a href="https://tracker.debian.org/pkg/tftpd-hpa">tftp</a>, mount a root filesystem through
 <a href="https://www.kernel.org/doc/Documentation/filesystems/nfs/nfsroot.txt">NFS</a>. From the minimal kernel built <a href="/~ricardo/2023/10/12/raspberrypi.html">before</a>, you need those symbols:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>INPUT_KEYBOARD       Enables keyboard drivers selection submenu
-INET                 TCP/IP networking
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>INET                 TCP/IP networking
 NFS_FS               Network FS client support (v3)
 IP_PNP               Automatic IP configuration
 IP_PNP_DHCP          DHCP for IP auto config
 ROOT_NFS             Root FS through NFS
-
 NETDEVICES           Network device support
 USB_USBNET           USB Networking
 USB_NET_SMSC95XX     SMSC LAN95XX Ethernet adapter driver

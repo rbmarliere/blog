@@ -9,13 +9,11 @@ The use case is simple: boot a kernel from [tftp][tftp], mount a root filesystem
 [NFS][nfs]. From the minimal kernel built [before][rpi], you need those symbols:
 
 ```
-INPUT_KEYBOARD       Enables keyboard drivers selection submenu
 INET                 TCP/IP networking
 NFS_FS               Network FS client support (v3)
 IP_PNP               Automatic IP configuration
 IP_PNP_DHCP          DHCP for IP auto config
 ROOT_NFS             Root FS through NFS
-
 NETDEVICES           Network device support
 USB_USBNET           USB Networking
 USB_NET_SMSC95XX     SMSC LAN95XX Ethernet adapter driver
